@@ -14,8 +14,8 @@ token symbolic names:
 null
 null
 null
-null
-null
+MUL
+ADD
 IDENT
 NUM
 INT_TYPE
@@ -25,8 +25,8 @@ WS
 rule names:
 T__0
 T__1
-T__2
-T__3
+MUL
+ADD
 IDENT
 NUM
 INT_TYPE

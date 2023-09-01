@@ -1,11 +1,12 @@
-// Main entry point for tutorial
 package main
 
 import (
 	"fmt"
 	"os"
 
+	"expr/model"
 	"expr/parser"
+	"expr/visitor"
 
 	"github.com/antlr4-go/antlr/v4"
 )
@@ -17,5 +18,12 @@ func main() {
 	tokens := antlr.NewCommonTokenStream(lexer, antlr.TokenDefaultChannel)
 	p := parser.NewExprParser(tokens)
 	prog := p.Prog()
-	fmt.Printf("%v\n", prog)
+	v := &visitor.Visitor{}
+	program := v.Visit(prog).(*model.Prog)
+	fmt.Println("Analyzing the input.")
+	fmt.Println(program)
+	fmt.Println("Running the program.\nResults:")
+	for i, r := range program.Run() {
+		fmt.Printf("  %d: %d\n", i+1, r)
+	}
 }

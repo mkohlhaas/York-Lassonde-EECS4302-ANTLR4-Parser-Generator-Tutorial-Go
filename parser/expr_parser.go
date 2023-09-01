@@ -36,7 +36,7 @@ func exprParserInit() {
 		"", "':'", "'='", "'*'", "'+'", "", "", "'INT'",
 	}
 	staticData.SymbolicNames = []string{
-		"", "", "", "", "", "IDENT", "NUM", "INT_TYPE", "COMMENT", "WS",
+		"", "", "", "MUL", "ADD", "IDENT", "NUM", "INT_TYPE", "COMMENT", "WS",
 	}
 	staticData.RuleNames = []string{
 		"prog", "decl", "expr",
@@ -98,8 +98,8 @@ const (
 	ExprParserEOF      = antlr.TokenEOF
 	ExprParserT__0     = 1
 	ExprParserT__1     = 2
-	ExprParserT__2     = 3
-	ExprParserT__3     = 4
+	ExprParserMUL      = 3
+	ExprParserADD      = 4
 	ExprParserIDENT    = 5
 	ExprParserNUM      = 6
 	ExprParserINT_TYPE = 7
@@ -258,6 +258,16 @@ func (s *ProgContext) ToStringTree(ruleNames []string, recog antlr.Recognizer) s
 	return antlr.TreesStringTree(s, ruleNames, recog)
 }
 
+func (s *ProgContext) Accept(visitor antlr.ParseTreeVisitor) interface{} {
+	switch t := visitor.(type) {
+	case ExprVisitor:
+		return t.VisitProg(s)
+
+	default:
+		return t.VisitChildren(s)
+	}
+}
+
 func (p *ExprParser) Prog() (localctx IProgContext) {
 	localctx = NewProgContext(p, p.GetParserRuleContext(), p.GetState())
 	p.EnterRule(localctx, 0, ExprParserRULE_prog)
@@ -392,6 +402,16 @@ func (s *DeclContext) ToStringTree(ruleNames []string, recog antlr.Recognizer) s
 	return antlr.TreesStringTree(s, ruleNames, recog)
 }
 
+func (s *DeclContext) Accept(visitor antlr.ParseTreeVisitor) interface{} {
+	switch t := visitor.(type) {
+	case ExprVisitor:
+		return t.VisitDecl(s)
+
+	default:
+		return t.VisitChildren(s)
+	}
+}
+
 func (p *ExprParser) Decl() (localctx IDeclContext) {
 	localctx = NewDeclContext(p, p.GetParserRuleContext(), p.GetState())
 	p.EnterRule(localctx, 2, ExprParserRULE_decl)
@@ -456,13 +476,6 @@ type IExprContext interface {
 
 	// GetParser returns the parser.
 	GetParser() antlr.Parser
-
-	// Getter signatures
-	IDENT() antlr.TerminalNode
-	NUM() antlr.TerminalNode
-	AllExpr() []IExprContext
-	Expr(i int) IExprContext
-
 	// IsExprContext differentiates from other interfaces.
 	IsExprContext()
 }
@@ -499,15 +512,101 @@ func NewExprContext(parser antlr.Parser, parent antlr.ParserRuleContext, invokin
 
 func (s *ExprContext) GetParser() antlr.Parser { return s.parser }
 
-func (s *ExprContext) IDENT() antlr.TerminalNode {
-	return s.GetToken(ExprParserIDENT, 0)
+func (s *ExprContext) CopyAll(ctx *ExprContext) {
+	s.CopyFrom(&ctx.BaseParserRuleContext)
 }
 
-func (s *ExprContext) NUM() antlr.TerminalNode {
+func (s *ExprContext) GetRuleContext() antlr.RuleContext {
+	return s
+}
+
+func (s *ExprContext) ToStringTree(ruleNames []string, recog antlr.Recognizer) string {
+	return antlr.TreesStringTree(s, ruleNames, recog)
+}
+
+type NumberContext struct {
+	ExprContext
+}
+
+func NewNumberContext(parser antlr.Parser, ctx antlr.ParserRuleContext) *NumberContext {
+	var p = new(NumberContext)
+
+	InitEmptyExprContext(&p.ExprContext)
+	p.parser = parser
+	p.CopyAll(ctx.(*ExprContext))
+
+	return p
+}
+
+func (s *NumberContext) GetRuleContext() antlr.RuleContext {
+	return s
+}
+
+func (s *NumberContext) NUM() antlr.TerminalNode {
 	return s.GetToken(ExprParserNUM, 0)
 }
 
-func (s *ExprContext) AllExpr() []IExprContext {
+func (s *NumberContext) Accept(visitor antlr.ParseTreeVisitor) interface{} {
+	switch t := visitor.(type) {
+	case ExprVisitor:
+		return t.VisitNumber(s)
+
+	default:
+		return t.VisitChildren(s)
+	}
+}
+
+type VariableContext struct {
+	ExprContext
+}
+
+func NewVariableContext(parser antlr.Parser, ctx antlr.ParserRuleContext) *VariableContext {
+	var p = new(VariableContext)
+
+	InitEmptyExprContext(&p.ExprContext)
+	p.parser = parser
+	p.CopyAll(ctx.(*ExprContext))
+
+	return p
+}
+
+func (s *VariableContext) GetRuleContext() antlr.RuleContext {
+	return s
+}
+
+func (s *VariableContext) IDENT() antlr.TerminalNode {
+	return s.GetToken(ExprParserIDENT, 0)
+}
+
+func (s *VariableContext) Accept(visitor antlr.ParseTreeVisitor) interface{} {
+	switch t := visitor.(type) {
+	case ExprVisitor:
+		return t.VisitVariable(s)
+
+	default:
+		return t.VisitChildren(s)
+	}
+}
+
+type MultiplicationContext struct {
+	ExprContext
+}
+
+func NewMultiplicationContext(parser antlr.Parser, ctx antlr.ParserRuleContext) *MultiplicationContext {
+	var p = new(MultiplicationContext)
+
+	InitEmptyExprContext(&p.ExprContext)
+	p.parser = parser
+	p.CopyAll(ctx.(*ExprContext))
+
+	return p
+}
+
+func (s *MultiplicationContext) GetRuleContext() antlr.RuleContext {
+	return s
+}
+
+func (s *MultiplicationContext) AllExpr() []IExprContext {
 	children := s.GetChildren()
 	len := 0
 	for _, ctx := range children {
@@ -528,7 +627,7 @@ func (s *ExprContext) AllExpr() []IExprContext {
 	return tst
 }
 
-func (s *ExprContext) Expr(i int) IExprContext {
+func (s *MultiplicationContext) Expr(i int) IExprContext {
 	var t antlr.RuleContext
 	j := 0
 	for _, ctx := range s.GetChildren() {
@@ -548,12 +647,91 @@ func (s *ExprContext) Expr(i int) IExprContext {
 	return t.(IExprContext)
 }
 
-func (s *ExprContext) GetRuleContext() antlr.RuleContext {
+func (s *MultiplicationContext) MUL() antlr.TerminalNode {
+	return s.GetToken(ExprParserMUL, 0)
+}
+
+func (s *MultiplicationContext) Accept(visitor antlr.ParseTreeVisitor) interface{} {
+	switch t := visitor.(type) {
+	case ExprVisitor:
+		return t.VisitMultiplication(s)
+
+	default:
+		return t.VisitChildren(s)
+	}
+}
+
+type AdditionContext struct {
+	ExprContext
+}
+
+func NewAdditionContext(parser antlr.Parser, ctx antlr.ParserRuleContext) *AdditionContext {
+	var p = new(AdditionContext)
+
+	InitEmptyExprContext(&p.ExprContext)
+	p.parser = parser
+	p.CopyAll(ctx.(*ExprContext))
+
+	return p
+}
+
+func (s *AdditionContext) GetRuleContext() antlr.RuleContext {
 	return s
 }
 
-func (s *ExprContext) ToStringTree(ruleNames []string, recog antlr.Recognizer) string {
-	return antlr.TreesStringTree(s, ruleNames, recog)
+func (s *AdditionContext) AllExpr() []IExprContext {
+	children := s.GetChildren()
+	len := 0
+	for _, ctx := range children {
+		if _, ok := ctx.(IExprContext); ok {
+			len++
+		}
+	}
+
+	tst := make([]IExprContext, len)
+	i := 0
+	for _, ctx := range children {
+		if t, ok := ctx.(IExprContext); ok {
+			tst[i] = t.(IExprContext)
+			i++
+		}
+	}
+
+	return tst
+}
+
+func (s *AdditionContext) Expr(i int) IExprContext {
+	var t antlr.RuleContext
+	j := 0
+	for _, ctx := range s.GetChildren() {
+		if _, ok := ctx.(IExprContext); ok {
+			if j == i {
+				t = ctx.(antlr.RuleContext)
+				break
+			}
+			j++
+		}
+	}
+
+	if t == nil {
+		return nil
+	}
+
+	return t.(IExprContext)
+}
+
+func (s *AdditionContext) ADD() antlr.TerminalNode {
+	return s.GetToken(ExprParserADD, 0)
+}
+
+func (s *AdditionContext) Accept(visitor antlr.ParseTreeVisitor) interface{} {
+	switch t := visitor.(type) {
+	case ExprVisitor:
+		return t.VisitAddition(s)
+
+	default:
+		return t.VisitChildren(s)
+	}
 }
 
 func (p *ExprParser) Expr() (localctx IExprContext) {
@@ -580,6 +758,10 @@ func (p *ExprParser) expr(_p int) (localctx IExprContext) {
 
 	switch p.GetTokenStream().LA(1) {
 	case ExprParserIDENT:
+		localctx = NewVariableContext(p, localctx)
+		p.SetParserRuleContext(localctx)
+		_prevctx = localctx
+
 		{
 			p.SetState(21)
 			p.Match(ExprParserIDENT)
@@ -590,6 +772,9 @@ func (p *ExprParser) expr(_p int) (localctx IExprContext) {
 		}
 
 	case ExprParserNUM:
+		localctx = NewNumberContext(p, localctx)
+		p.SetParserRuleContext(localctx)
+		_prevctx = localctx
 		{
 			p.SetState(22)
 			p.Match(ExprParserNUM)
@@ -627,7 +812,7 @@ func (p *ExprParser) expr(_p int) (localctx IExprContext) {
 
 			switch p.GetInterpreter().AdaptivePredict(p.BaseParser, p.GetTokenStream(), 3, p.GetParserRuleContext()) {
 			case 1:
-				localctx = NewExprContext(p, _parentctx, _parentState)
+				localctx = NewMultiplicationContext(p, NewExprContext(p, _parentctx, _parentState))
 				p.PushNewRecursionContext(localctx, _startState, ExprParserRULE_expr)
 				p.SetState(25)
 
@@ -637,7 +822,7 @@ func (p *ExprParser) expr(_p int) (localctx IExprContext) {
 				}
 				{
 					p.SetState(26)
-					p.Match(ExprParserT__2)
+					p.Match(ExprParserMUL)
 					if p.HasError() {
 						// Recognition error - abort rule
 						goto errorExit
@@ -649,7 +834,7 @@ func (p *ExprParser) expr(_p int) (localctx IExprContext) {
 				}
 
 			case 2:
-				localctx = NewExprContext(p, _parentctx, _parentState)
+				localctx = NewAdditionContext(p, NewExprContext(p, _parentctx, _parentState))
 				p.PushNewRecursionContext(localctx, _startState, ExprParserRULE_expr)
 				p.SetState(28)
 
@@ -659,7 +844,7 @@ func (p *ExprParser) expr(_p int) (localctx IExprContext) {
 				}
 				{
 					p.SetState(29)
-					p.Match(ExprParserT__3)
+					p.Match(ExprParserADD)
 					if p.HasError() {
 						// Recognition error - abort rule
 						goto errorExit

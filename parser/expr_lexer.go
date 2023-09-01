@@ -46,10 +46,10 @@ func exprlexerLexerInit() {
 		"", "':'", "'='", "'*'", "'+'", "", "", "'INT'",
 	}
 	staticData.SymbolicNames = []string{
-		"", "", "", "", "", "IDENT", "NUM", "INT_TYPE", "COMMENT", "WS",
+		"", "", "", "MUL", "ADD", "IDENT", "NUM", "INT_TYPE", "COMMENT", "WS",
 	}
 	staticData.RuleNames = []string{
-		"T__0", "T__1", "T__2", "T__3", "IDENT", "NUM", "INT_TYPE", "COMMENT",
+		"T__0", "T__1", "MUL", "ADD", "IDENT", "NUM", "INT_TYPE", "COMMENT",
 		"WS",
 	}
 	staticData.PredictionContextCache = antlr.NewPredictionContextCache()
@@ -127,8 +127,8 @@ func NewExprLexer(input antlr.CharStream) *ExprLexer {
 const (
 	ExprLexerT__0     = 1
 	ExprLexerT__1     = 2
-	ExprLexerT__2     = 3
-	ExprLexerT__3     = 4
+	ExprLexerMUL      = 3
+	ExprLexerADD      = 4
 	ExprLexerIDENT    = 5
 	ExprLexerNUM      = 6
 	ExprLexerINT_TYPE = 7

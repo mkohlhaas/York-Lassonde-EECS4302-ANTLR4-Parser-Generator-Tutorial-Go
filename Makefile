@@ -4,7 +4,7 @@ all: build
 
 genParser: Expr.g4
 	rm -rf parser
-	antlr4 -Dlanguage=Go -o parser -no-listener -no-visitor $^
+	antlr4 -Dlanguage=Go -o parser -no-listener -visitor $^
 
 build: genParser
 	go build

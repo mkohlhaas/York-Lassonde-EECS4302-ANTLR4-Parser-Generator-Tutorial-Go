@@ -14,8 +14,8 @@ token symbolic names:
 null
 null
 null
-null
-null
+MUL
+ADD
 IDENT
 NUM
 INT_TYPE
