@@ -4,6 +4,7 @@ import (
 	"strconv"
 )
 
+// Number defines a number in our grammar.
 type Number struct {
 	Num int
 }

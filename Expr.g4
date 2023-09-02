@@ -1,7 +1,7 @@
 grammar Expr;
 
-prog : (decl | expr)+ EOF          ;
-decl : IDENT ':' INT_TYPE '=' NUM  ;
+prog : (decl | expr)+ EOF ;
+decl : IDENT ':' INT_TYPE '=' NUM ;
 expr : expr '*' expr               # multiplication
      | expr '+' expr               # addition
      | IDENT                       # variable

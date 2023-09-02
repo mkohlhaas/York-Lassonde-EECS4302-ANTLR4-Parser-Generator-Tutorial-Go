@@ -1,3 +1,4 @@
+-- Should produce results (no errors)
 i: INT = 5
 j: INT = 7
 11

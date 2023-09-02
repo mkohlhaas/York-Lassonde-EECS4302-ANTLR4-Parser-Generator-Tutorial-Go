@@ -2,6 +2,7 @@ package model
 
 import "fmt"
 
+// Multiplication defines a multiplication in our grammar.
 type Multiplication struct {
 	Left, Right Expression
 }

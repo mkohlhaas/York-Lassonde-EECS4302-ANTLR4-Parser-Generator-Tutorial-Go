@@ -1,3 +1,4 @@
+-- Should produce a semantic error
 i: INT = 5
  i: INT = 7
 i + 23

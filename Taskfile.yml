@@ -1,12 +1,45 @@
-# https://taskfile.dev
+# yaml-language-server: $schema=https://taskfile.dev/schema.json
 
 version: 3
-
-vars:
-  GREETING: Hello, World!
 
 tasks:
   default:
     cmds:
-      - echo "{{.GREETING}}"
+      - task: generate-parser
+      - go build
+    sources:
+      - Expr.g4
+      - '**/*.go'
+    generates:
+      - expr
+    desc: Builds the project.
+
+  generate-parser:
+    cmds:
+      - task: clean
+      - antlr4 -Dlanguage=Go -o parser -no-listener -visitor Expr.g4
+    sources:
+      - Expr.g4
+    generates:
+      - parser/*
+    status:
+      - test -d parser
+    desc: Generates the parser.
+
+  tests:
+    sources:
+      - test/test*.txt
+    cmds:
+      - for: sources
+        cmd: ./expr {{.ITEM}}
+    ignore_error: true
+    deps:
+      - default
+    desc: Tests the parser against some test files.
+
+  clean:
+    cmds:
+      - rm -f expr
+      - rm -rf parser
     silent: true
+    desc: Removes binary and generated parser files.

@@ -1,7 +1,9 @@
+// Package model is the AST for a program as defined in the grammar Expr.g4.
 package model
 
 import "fmt"
 
+// Addition defines addition in our grammar.
 type Addition struct {
 	Left, Right Expression
 }
